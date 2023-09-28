@@ -22,9 +22,11 @@ function Product({ id, title, price, description, category, image }) {
       id,
       title,
       price,
+      rating,
       description,
       category,
       image,
+      hasPrime,
     };
     dispatch(addToBasket(product));
   };
@@ -40,6 +42,7 @@ function Product({ id, title, price, description, category, image }) {
         height={200}
         width={200}
         //  objectFit="contain"
+        alt={image}
       />
 
       <h4 className="my-3">{title}</h4>

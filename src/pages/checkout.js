@@ -1,11 +1,17 @@
 import Image from "next/image";
 import Header from "../components/Header";
 import { useSelector } from "react-redux";
-import { selectItems } from "../slices/basketSlice";
+import { selectItems, selectTotal } from "../slices/basketSlice";
+import Currency from "react-currency-formatter";
 import CheckoutProduct from "../components/CheckoutProduct";
+import { useSession } from "next-auth/react";
 
 function Checkout() {
+  const { session } = useSession();
   const items = useSelector(selectItems);
+  const total = useSelector(selectTotal);
+
+  console.log("session info", session);
 
   //   console.log("items: ", items);
 
@@ -23,6 +29,7 @@ function Checkout() {
             src="https://links.papareact.com/ikj"
             width={1020}
             height={250}
+            alt="header image"
           />
 
           <div className="flex flex-col p-5 space-y-10 bg-white">
@@ -30,9 +37,9 @@ function Checkout() {
               {items.length === 0 ? "Your Basket is empty" : "Shopping Basket"}
             </h1>
 
-            {items.map((item, i) => {
+            {items.map((item, i) => (
               <CheckoutProduct
-                key={index}
+                key={i}
                 id={item.id}
                 title={item.title}
                 rating={item.rating}
@@ -41,14 +48,34 @@ function Checkout() {
                 category={item.category}
                 image={item.image}
                 hasPrime={item.hasPrime}
-              />;
-              // <div key={i}>{item?.title}</div>;
-            })}
+              />
+            ))}
           </div>
         </div>
 
         {/* right */}
-        <div></div>
+        <div className="flex flex-col bg-white p-10 shadow-md">
+          {items.length > 0 && (
+            <>
+              <h2 className="whitespace-nowrap">
+                Subtotal ({items.length} items):{" "}
+                <span className="font-bold">
+                  <Currency quantity={total} currency="ZAR" />
+                </span>
+              </h2>
+
+              <button
+                disabled={!session}
+                className={`button mt-2 ${
+                  !session &&
+                  "from-gray-300 to-gray-500 border-gray-200 text-gray-300 cursor-not-allowed"
+                }`}
+              >
+                {!session ? "Sign in to checkout" : "Proceed to checkout"}
+              </button>
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
