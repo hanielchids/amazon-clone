@@ -32,7 +32,7 @@ function Checkout() {
 
             {items.map((item, i) => {
               <CheckoutProduct
-                key={index}
+                key={i}
                 id={item.id}
                 title={item.title}
                 rating={item.rating}
