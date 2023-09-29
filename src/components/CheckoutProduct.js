@@ -47,7 +47,7 @@ function CheckoutProduct({
               <StarIcon key={i} className="h-5 text-yellow-500" />
             ))}
         </div>
-        <p className="text-xs my-2 line-clamp-3">dsgdsg{description}</p>
+        <p className="text-xs my-2 line-clamp-3">{description}</p>
         <Currency quantity={price} currency="ZAR" />
 
         {hasPrime && (
