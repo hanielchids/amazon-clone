@@ -5,19 +5,32 @@ import { selectItems, selectTotal } from "../slices/basketSlice";
 import Currency from "react-currency-formatter";
 import CheckoutProduct from "../components/CheckoutProduct";
 import { useSession } from "next-auth/react";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+const stripePromise = loadStripe(process.env.stripe_public_key);
 
 function Checkout() {
-  const { session } = useSession();
+  const session = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const items = useSelector(selectItems);
   const total = useSelector(selectTotal);
 
-  console.log("session info", session);
+  const createCheckoutSession = async () => {
+    setIsLoading(true);
+    const response = await axios.post("/api/create-checkout-session", {
+      items: items,
+      email: session.data.user.email,
+    });
 
-  //   console.log("items: ", items);
+    const sessionUrl = response.data.url;
 
-  items.map((item, i) => {
-    console.log("items: ", item?.title);
-  });
+    setIsLoading(false);
+    router.push(sessionUrl);
+  };
 
   return (
     <div className="bg-gray-100">
@@ -65,17 +78,32 @@ function Checkout() {
               </h2>
 
               <button
-                disabled={!session}
+                role="link"
+                onClick={createCheckoutSession}
+                disabled={session.status === "unauthenticated"}
                 className={`button mt-2 ${
-                  !session &&
+                  session.status === "unauthenticated" &&
                   "from-gray-300 to-gray-500 border-gray-200 text-gray-300 cursor-not-allowed"
                 }`}
               >
-                {!session ? "Sign in to checkout" : "Proceed to checkout"}
+                {session.status === "unauthenticated"
+                  ? "Sign in to checkout"
+                  : "Proceed to checkout"}
               </button>
             </>
           )}
         </div>
+
+        {isLoading && (
+          <div className="w-full h-full fixed block top-0 left-0 bg-black opacity-50 z-50">
+            <span className="opacity-75 top-1/2 my-0 mx-auto block relative w-0 h-0">
+              <span className="relative flex h-12 w-12">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-12 w-12 bg-sky-500"></span>
+              </span>
+            </span>
+          </div>
+        )}
       </main>
     </div>
   );
